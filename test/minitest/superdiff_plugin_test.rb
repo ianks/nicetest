@@ -20,7 +20,6 @@ module Minitest
           "\e[35m-   \"b\" => 2\e[0m\n\e[33m+   \"b\" => 3\e[0m\n  }",
         e.message,
       )
-      assert_equal("foo", "bar")
     end
 
     def test_assert_includes_array
