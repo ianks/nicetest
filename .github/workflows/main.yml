@@ -8,7 +8,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     name: Ruby ${{ matrix.ruby }}
     strategy:
@@ -19,10 +19,28 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
+
     - name: Run the default task
       run: bundle exec rake
+
+    - name: Install gem
+      run: bundle exec rake install
+
+    - uses: actions/checkout@v4
+      with:
+        repository: Shopify/liquid
+        ref: 77bc56a1c28a707c2b222559ffb0b7b1c5588928
+        path: tmp/liquid
+
+    - name: Run on another repo
+      run: |
+        cd tmp/liquid
+        bundle install --jobs 4 --retry 3
+        nicetest --reporter spec,junit
+
