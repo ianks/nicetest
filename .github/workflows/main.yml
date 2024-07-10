@@ -21,17 +21,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
+    - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
 
-    - name: Run the default task
-      run: bundle exec rake
-
-    - name: Install gem
-      run: bundle exec rake build && mv pkg/*.gem pkg/nicetest.gem
+    - name: Test and build gem
+      run: |
+        bundle exec rake
+        bundle exec rake build
+        mv pkg/*.gem pkg/nicetest.gem
 
     - uses: actions/checkout@v4
       with:
@@ -39,11 +38,16 @@ jobs:
         ref: 77bc56a1c28a707c2b222559ffb0b7b1c5588928
         path: tmp/liquid
 
-    - name: Run on another repo
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
+        working-directory: tmp/liquid
+
+    - name: Run tests on another repository
       run: |
         gempath="$PWD/pkg/nicetest.gem"
         cd tmp/liquid
-        bundle install --jobs 4 --retry 3
         gem install "$gempath" --no-document
         nicetest --reporter spec,junit
 
