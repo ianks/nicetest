@@ -4,6 +4,7 @@ require "pastel"
 require "minitest"
 require "optparse"
 require "English"
+require "set"
 
 module Nicetest
   class Cli
