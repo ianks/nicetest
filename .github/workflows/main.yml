@@ -30,7 +30,7 @@ jobs:
       run: bundle exec rake
 
     - name: Install gem
-      run: bundle exec rake install
+      run: bundle exec rake build && mv pkg/*.gem pkg/nicetest.gem
 
     - uses: actions/checkout@v4
       with:
@@ -40,7 +40,9 @@ jobs:
 
     - name: Run on another repo
       run: |
+        gempath="$PWD/pkg/nicetest.gem"
         cd tmp/liquid
         bundle install --jobs 4 --retry 3
+        gem install "$gempath" --no-document
         nicetest --reporter spec,junit
 
