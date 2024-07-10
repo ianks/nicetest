@@ -1,7 +1,19 @@
 # frozen_string_literal: true
 
+require "pastel"
+require "minitest/focus"
+
 require_relative "nicetest/version"
+require_relative "nicetest/logger"
+require_relative "nicetest/cli"
+require_relative "nicetest/backtrace_filter"
 
 module Nicetest
   class Error < StandardError; end
+
+  class << self
+    def logger
+      @logger ||= Logger.new($stderr)
+    end
+  end
 end

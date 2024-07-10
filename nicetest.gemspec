@@ -22,9 +22,11 @@ Gem::Specification.new do |spec|
   File.basename(__FILE__)
   spec.files = Dir["lib/**/*.rb", "exe/*", "LICENSE.txt", "README.md"]
   spec.bindir = "exe"
-  spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
+  spec.executables = ["nicetest"]
   spec.require_paths = ["lib"]
 
+  spec.add_dependency("minitest-focus", "~> 1.4")
   spec.add_dependency("minitest-reporters", "~> 1.4")
+  spec.add_dependency("pastel", "~> 0.8")
   spec.add_dependency("super_diff", "~> 0.12")
 end
