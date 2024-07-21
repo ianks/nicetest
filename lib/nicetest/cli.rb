@@ -17,7 +17,7 @@ module Nicetest
       cli_options = Opts.parse!(@argv)
       if (dir = cli_options.cd)
         run_in_directory(dir)
-      elsif File.exist?("Gemfile")
+      elsif File.exist?("Gemfile") && !File.read("Gemfile").include?("nicetest")
         run_in_directory(".")
       else
         run_tests
@@ -86,14 +86,17 @@ module Nicetest
       run_proc = proc do
         requires << "-rbundler/setup" if File.exist?("Gemfile")
 
-        system(
+        cmd = [
           RbConfig.ruby,
           *loadpaths,
           *requires,
           "-e",
           "exit(Nicetest::Cli.new(ARGV).run_tests)",
+          "--",
           *args_with_removed_leading_path,
-        )
+        ]
+        @logger.debug("running #{cmd.join(" ")}")
+        system(*cmd)
         $CHILD_STATUS.exitstatus
       end
 
