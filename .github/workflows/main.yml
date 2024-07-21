@@ -49,5 +49,5 @@ jobs:
         gempath="$PWD/pkg/nicetest.gem"
         cd tmp/liquid
         gem install "$gempath" --no-document
-        nicetest --reporter spec,junit ./test/unit
+        nicetest --reporter spec,junit
 

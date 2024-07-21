@@ -24,6 +24,7 @@ Gem::Specification.new do |spec|
   spec.executables = ["nicetest"]
   spec.require_paths = ["lib"]
 
+  spec.add_dependency("minitest", ">= 5.0")
   spec.add_dependency("minitest-focus", "~> 1.4")
   spec.add_dependency("minitest-reporters", "~> 1.4")
   spec.add_dependency("optparse", ">= 0.5.0") # since we override OptionParser#callback! temporarily

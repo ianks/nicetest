@@ -17,27 +17,11 @@ module Nicetest
       cli_options = Opts.parse!(@argv)
       if (dir = cli_options.cd)
         run_in_directory(dir)
+      elsif File.exist?("Gemfile")
+        run_in_directory(".")
       else
         run_tests
       end
-    end
-
-    private
-
-    def fetch_dep_loadpaths(gemspec, seen = {})
-      return [] if seen[gemspec.name]
-
-      seen[gemspec.name] = true
-      load_paths = gemspec.load_paths
-
-      gemspec.dependencies.each do |dep|
-        dep_spec = Gem.loaded_specs[dep.name]
-        next unless dep_spec
-
-        load_paths.concat(fetch_dep_loadpaths(dep_spec, seen))
-      end
-
-      load_paths
     end
 
     def run_tests
@@ -58,11 +42,37 @@ module Nicetest
       Minitest.run(args)
     end
 
-    def run_in_directory(dir)
-      dir = File.expand_path(cli_options.cd)
+    private
+
+    def fetch_dep_loadpaths(gemspec, seen = {})
+      return [] if seen[gemspec.name]
+
+      seen[gemspec.name] = true
+      load_paths = gemspec.full_require_paths
+
+      gemspec.dependencies.each do |dep|
+        dep_spec = Gem.loaded_specs[dep.name]
+        next unless dep_spec
+
+        load_paths.concat(fetch_dep_loadpaths(dep_spec, seen))
+      end
+
+      load_paths
+    end
+
+    def run_in_directory(input_dir)
+      dir = File.expand_path(input_dir)
       dir.delete_suffix!("/") # remove trailing slash
 
-      @logger.info("changing directory to #{dir}")
+      chdir = if input_dir != "."
+        ->(&blk) do
+          @logger.info("changing directory to #{dir}")
+          Dir.chdir(dir, &blk)
+        end
+      else
+        ->(&blk) { blk.call }
+      end
+
       loadpaths = fetch_dep_loadpaths(Gem.loaded_specs["nicetest"]).map { |path| "-I#{path}" }
       requires = ["-rnicetest"]
       args_with_removed_leading_path = @argv.map do |arg|
@@ -73,19 +83,25 @@ module Nicetest
         arg
       end
 
-      Dir.chdir(dir) do
-        Bundler.with_unbundled_env do
-          requires << "-rbundler/setup" if File.exist?("Gemfile")
+      run_proc = proc do
+        requires << "-rbundler/setup" if File.exist?("Gemfile")
 
-          system(
-            RbConfig.ruby,
-            *loadpaths,
-            *requires,
-            "-e",
-            "exit(Nicetest::Cli.new(ARGV).run)",
-            *args_with_removed_leading_path,
-          )
-          $CHILD_STATUS.exitstatus
+        system(
+          RbConfig.ruby,
+          *loadpaths,
+          *requires,
+          "-e",
+          "exit(Nicetest::Cli.new(ARGV).run_tests)",
+          *args_with_removed_leading_path,
+        )
+        $CHILD_STATUS.exitstatus
+      end
+
+      chdir.call do
+        if defined?(Bundler)
+          Bundler.with_unbundled_env(&run_proc)
+        else
+          run_proc.call
         end
       end
     end

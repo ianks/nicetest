@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     nicetest (0.1.0)
+      minitest (>= 5.0)
       minitest-focus (~> 1.4)
       minitest-reporters (~> 1.4)
       optparse (>= 0.5.0)
