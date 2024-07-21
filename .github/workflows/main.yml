@@ -27,6 +27,8 @@ jobs:
         bundler-cache: true
 
     - name: Test and build gem
+      env:
+        RUBYGEMS_FORCE_DISABLE_GEM_SIGNING: "true"
       run: |
         bundle exec rake
         bundle exec rake build

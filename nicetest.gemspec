@@ -13,11 +13,7 @@ Gem::Specification.new do |spec|
   spec.homepage = "https://github.com/ianks/nicetest"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.0.0"
-
-  spec.metadata["allowed_push_host"] = "not yet"
-
-  spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = spec.homepage
+  spec.metadata["allowed_push_host"] = "https://rubygems.org"
 
   spec.files = Dir["lib/**/*.rb", "exe/*", "LICENSE.txt", "README.md"]
   spec.bindir = "exe"
