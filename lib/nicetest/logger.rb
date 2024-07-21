@@ -21,6 +21,12 @@ module Nicetest
       log("info ", message, color: :cyan)
     end
 
+    def debug(message)
+      if ENV["NICETEST_DEBUG"] == "1"
+        log("debug", message, color: :blue)
+      end
+    end
+
     def fatal!(message)
       error(message)
       exit(1)
