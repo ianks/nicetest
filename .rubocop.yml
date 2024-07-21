@@ -7,3 +7,7 @@ require:
 
 AllCops:
   TargetRubyVersion: 3.0
+
+Style/SpecialGlobalVars:
+  Enabled: true
+  Exclude: ["nicetest.gemspec"]
