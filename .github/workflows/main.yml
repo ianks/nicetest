@@ -52,4 +52,13 @@ jobs:
         cd tmp/liquid
         gem install "$gempath" --no-document
         nicetest --reporter spec,junit
+        nicetest test/unit/parser_unit_test.rb:15 test/unit/parser_unit_test.rb:38 > result.txt
+
+        if grep -q "2 tests" result.txt; then
+          echo "All tests passed"
+        else
+          echo "Some tests failed"
+          cat result.txt
+          exit 1
+        fi
 
