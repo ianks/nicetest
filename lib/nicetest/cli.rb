@@ -24,7 +24,7 @@ module Nicetest
       end
     end
 
-    def run_tests(cli_options)
+    def run_tests(cli_options = Opts.parse!(@argv))
       disable_autorun!
       adjust_load_path!
 
