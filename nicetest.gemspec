@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency("minitest-reporters", "~> 1.4")
   spec.add_dependency("optparse", ">= 0.5.0") # since we override OptionParser#callback! temporarily
   spec.add_dependency("pastel", "~> 0.8")
+  spec.add_dependency("prism", ">= 0.30")
   spec.add_dependency("super_diff", "~> 0.12")
 
   spec.cert_chain = ["certs/ianks.pem"]

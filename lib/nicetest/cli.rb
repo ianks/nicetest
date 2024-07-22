@@ -20,11 +20,11 @@ module Nicetest
       elsif File.exist?("Gemfile") && !File.read("Gemfile").include?("nicetest")
         run_in_directory(".")
       else
-        run_tests
+        run_tests(cli_options)
       end
     end
 
-    def run_tests
+    def run_tests(cli_options = Opts.parse!(@argv))
       disable_autorun!
       adjust_load_path!
 
@@ -32,12 +32,24 @@ module Nicetest
       argv_test_files = select_file_args(args)
       argv_test_files = glob_test_files("test") if argv_test_files.empty?
       args -= argv_test_files
+      finder = TestFinder.new
+      filters = Set.new
 
-      required_files = argv_test_files.flat_map do |file_or_dir|
+      if cli_options.name
+        name = cli_options.name
+        name = name[1..-1] if name.start_with?("/")
+        name = name[0..-2] if name.end_with?("/")
+        filters << name
+      end
+
+      required_files = argv_test_files.map do |pattern|
+        file_or_dir, filter = finder.filter_for(pattern)
+        filters << filter if filter && !cli_options.name
         require_path_or_dir(file_or_dir)
       end
 
       @logger.fatal!("no test files found") if required_files.compact.empty?
+      args << "--name=/#{filters.to_a.join("|")}/" if filters.any?
 
       Minitest.run(args)
     end
@@ -164,7 +176,7 @@ module Nicetest
       end
     end
 
-    Opts = Struct.new(:cd) do
+    Opts = Struct.new(:cd, :name) do
       class << self
         def parse!(argv)
           old_officious = OptionParser::Officious.dup
@@ -176,6 +188,10 @@ module Nicetest
             opts.raise_unknown = false
             opts.on("--cd=DIR", "Change directory before running tests") do |dir|
               options[:cd] = dir
+            end
+
+            opts.on("-n", "--name=PATTERN", "Filter test names on pattern") do |pattern|
+              options[:name] = pattern
             end
           end
 

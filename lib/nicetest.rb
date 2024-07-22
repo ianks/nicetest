@@ -7,6 +7,7 @@ require_relative "nicetest/version"
 require_relative "nicetest/logger"
 require_relative "nicetest/cli"
 require_relative "nicetest/backtrace_filter"
+require_relative "nicetest/test_finder"
 
 module Nicetest
   class Error < StandardError; end
