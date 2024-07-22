@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # opts.banner = "Usage: example.rb [options]"
-require "nicetest/cli"
+require "nicetest"
 
 module Minitest
   class << self
