@@ -46,6 +46,15 @@ Writing XML reports to /Users/ianks/Code/Shopify/liquid/tmp/nicetest/junit/17218
 
 Finished in 0.94625s
 799 tests, 1924 assertions, 0 failures, 0 errors, 0 skips
+
+# Filter by name
+❯ nicetest --name=/assign/ 
+Started with run options --name=/assign/ --seed 44734
+
+  33/33: [====================================================================================] 100% Time: 00:00:00, Time: 00:00:00
+
+Finished in 0.03157s
+33 tests, 69 assertions, 0 failures, 0 errors, 0 skips
 ```
 
 ### Add to project
@@ -93,6 +102,14 @@ task :test do
 end
 ```
 
+## Recognition
+
+- [minitest] for superb testing
+- [minitest-reporters] for the excellent reporting
+- [super_diff] for the pretty diffs
+- [prism] for the blissful parser
+- [pastel] for the pretty colors
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at
@@ -102,3 +119,9 @@ https://github.com/ianks/nicetest.
 
 The gem is available as open source under the terms of the [MIT
 License](https://opensource.org/licenses/MIT).
+
+[minitest]: https://github.com/minitest/minitest
+[minitest-reporters]: https://github.com/minitest-reporters/minitest-reporters
+[super_diff]: https://github.com/mcmire/super_diff
+[prism]: https://github.com/ruby/prism
+[pastel]: https://github.com/piotrmurach/pastel
