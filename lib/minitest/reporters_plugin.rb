@@ -2,7 +2,7 @@
 
 module Minitest
   module ReportersPlugin
-    MAPPING = {
+    MAPPING ||= {
       "none" => ->(_options) { nil },
       "default" => ->(options) { Minitest::Reporters::DefaultReporter.new(io: options[:io]) },
       "spec" => ->(options) { Minitest::Reporters::SpecReporter.new(io: options[:io]) },

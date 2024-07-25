@@ -190,8 +190,9 @@ module Nicetest
               options[:cd] = dir
             end
 
-            opts.on("-n", "--name=PATTERN", "Filter test names on pattern") do |pattern|
-              options[:name] = pattern
+            opts.on("--version", "Show the version") do
+              puts "nicetest #{Nicetest::VERSION}"
+              exit
             end
           end
 
