@@ -26,19 +26,26 @@ $ gem install nicetest
 # Go into a repo
 $ git clone https://github.com/Shopfy/liquid; cd liquid; bundle install
 
-# Run the tests
-$ nicetest --reporter doc test/integration/capture_test.rb
-Started with run options --reporter doc --seed 12874
+# Run a test
+❯ nicetest --reporter doc test/integration/capture_test.rb:14
+Started with run options --reporter doc --name=/CaptureTest#test_capture_with_hyphen_in_variable_name/ --seed 24518
 
 CaptureTest
-  test_increment_assign_score_by_bytes_not_characters             PASS (0.00s)
-  test_captures_block_content_in_variable                         PASS (0.00s)
-  test_capture_to_variable_from_outer_scope_if_existing           PASS (0.00s)
-  test_assigning_from_capture                                     PASS (0.00s)
   test_capture_with_hyphen_in_variable_name                       PASS (0.00s)
 
-Finished in 0.00123s
-5 tests, 5 assertions, 0 failures, 0 errors, 0 skips
+Finished in 0.00115s
+1 tests, 1 assertions, 0 failures, 0 errors, 0 skips
+
+# JUnit is easy
+❯ nicetest --reporter junit,progress                          
+Emptying /Users/ianks/Code/Shopify/liquid/tmp/nicetest/junit/1721874837
+Started with run options --reporter junit,progress --seed 36139
+
+  799/799: [================================================================================] 100% Time: 00:00:00, Time: 00:00:00
+Writing XML reports to /Users/ianks/Code/Shopify/liquid/tmp/nicetest/junit/1721874837
+
+Finished in 0.94625s
+799 tests, 1924 assertions, 0 failures, 0 errors, 0 skips
 ```
 
 ### Add to project
