@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    nicetest (0.1.1)
+    nicetest (0.1.2)
       minitest (>= 5.0)
       minitest-focus (~> 1.4)
       minitest-reporters (~> 1.4)
