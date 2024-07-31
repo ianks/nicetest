@@ -1,24 +1,27 @@
 # frozen_string_literal: true
 
-module Nicetest
-  module SuperdiffPlugin
-    class << self
-      def minitest_plugin_options(opts, options)
-        opts.on("--no-superdiff", "Disable superdiff") do
-          options[:no_superdiff] = true
-        end
-      end
-
-      def minitest_plugin_init(options)
-        return if options[:no_superdiff]
-
-        require "super_diff"
-        Minitest::Assertions.prepend(SuperdiffPlugin)
+module Minitest
+  class << self
+    def plugin_superdiff_options(opts, options)
+      opts.on("--no-superdiff", "Disable superdiff") do
+        options[:no_superdiff] = true
       end
     end
 
+    def plugin_superdiff_init(options)
+      return if options[:no_superdiff]
+
+      require "super_diff"
+      Minitest::Assertions.prepend(Nicetest::SuperdiffPlugin)
+    end
+  end
+end
+
+module Nicetest
+  module SuperdiffPlugin
     module Helpers
       extend self
+
       def inspect_styled(obj, style, prefix: nil)
         obj = SuperDiff.inspect_object(obj, as_lines: false)
         SuperDiff::Core::Helpers.style(style, "#{prefix}#{obj}")
