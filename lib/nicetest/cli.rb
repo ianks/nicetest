@@ -152,14 +152,17 @@ module Nicetest
     end
 
     def glob_test_files(dir)
-      Dir.glob("#{dir}/**{,/*/**}/*_test.rb")
+      Dir[
+        "#{dir}/**/test_*.rb",
+        "#{dir}/**/*_{test,spec}.rb",
+      ]
     end
 
     def require_path_or_dir(path_or_dir)
       if path_or_dir.end_with?(".rb")
         [try_require(path_or_dir)]
       else
-        Dir.glob("#{path_or_dir}/**{,/*/**}/*_test.rb").map do |f|
+        glob_test_files(path_or_dir).map do |f|
           try_require(f)
         end
       end
