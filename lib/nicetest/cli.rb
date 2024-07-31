@@ -42,7 +42,9 @@ module Nicetest
         filters << name
       end
 
-      patch_minitest_process_args!(args)
+      # Gross hack to allow for plugins to be loaded before we require the test files
+      Minitest.load_plugins unless args.delete("--no-plugins") || ENV["MT_NO_PLUGINS"]
+      processed_args = Minitest.process_args(args)
 
       required_files = argv_test_files.map do |pattern|
         file_or_dir, filter = finder.filter_for(pattern)
@@ -51,26 +53,26 @@ module Nicetest
       end
 
       @logger.fatal!("no test files found") if required_files.compact.empty?
-      args << "--name=/#{filters.to_a.join("|")}/" if filters.any?
+
+      if filters.any?
+        processed_args[:filter] = Regexp.union(*filters.map do |filter|
+          Regexp.new("^#{filter}$")
+        end)
+        processed_args[:args] = "#{processed_args[:args]} --name=/^#{processed_args[:filter].source}$/"
+      end
+
+      patch_minitest_process_args!(processed_args)
 
       Minitest.run(args)
     end
 
     private
 
-    def patch_minitest_process_args!(args)
-      # Gross hack to allow for plugins to be loaded before we require the test files
-      Minitest.load_plugins unless args.delete("--no-plugins") || ENV["MT_NO_PLUGINS"]
-      processed_args = Minitest.process_args(args)
+    def patch_minitest_process_args!(preprocessed)
       original_process_args = Minitest.method(:process_args)
-      Minitest.define_singleton_method(:process_args) do |input_args|
+      Minitest.define_singleton_method(:process_args) do |_input_args|
         Minitest.define_singleton_method(:process_args, original_process_args)
-
-        if input_args == args
-          processed_args
-        else
-          original_process_args.call(input_args)
-        end
+        preprocessed
       end
     end
 
