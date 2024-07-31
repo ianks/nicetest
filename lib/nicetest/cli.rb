@@ -202,9 +202,21 @@ module Nicetest
     end
 
     def register_minitest_plugins!
-      Minitest.register_plugin(Nicetest::NicetestPlugin)
-      Minitest.register_plugin(Nicetest::ReportersPlugin)
-      Minitest.register_plugin(Nicetest::SuperdiffPlugin)
+      if Minitest.respond_to?(:register_plugin)
+        Minitest.register_plugin(Nicetest::NicetestPlugin)
+        Minitest.register_plugin(Nicetest::ReportersPlugin)
+        Minitest.register_plugin(Nicetest::SuperdiffPlugin)
+      else
+        shim_plugin!(Nicetest::NicetestPlugin, :nicetest)
+        shim_plugin!(Nicetest::ReportersPlugin, :reporters)
+        shim_plugin!(Nicetest::SuperdiffPlugin, :superdiff)
+      end
+    end
+
+    def shim_plugin!(plugin, name)
+      Minitest.define_singleton_method("plugin_#{name}_init", plugin.method(:minitest_plugin_init).to_proc)
+      Minitest.define_singleton_method("plugin_#{name}_options", plugin.method(:minitest_plugin_options).to_proc)
+      Minitest.instance_variable_get(:@extensions) << name
     end
 
     Opts = Struct.new(:cd, :name) do
