@@ -11,6 +11,8 @@ module Nicetest
     def initialize(argv)
       @argv = argv
       @logger = Logger.new($stderr)
+      register_minitest_plugins!
+      adjust_load_path!
     end
 
     def run
@@ -26,7 +28,6 @@ module Nicetest
 
     def run_tests(cli_options = Opts.parse!(@argv))
       disable_autorun!
-      adjust_load_path!
 
       args = @argv.dup
       argv_test_files = select_file_args(args)
@@ -42,6 +43,8 @@ module Nicetest
         filters << name
       end
 
+      patch_minitest_process_args!(args)
+
       required_files = argv_test_files.map do |pattern|
         file_or_dir, filter = finder.filter_for(pattern)
         filters << filter if filter && !cli_options.name
@@ -55,6 +58,22 @@ module Nicetest
     end
 
     private
+
+    def patch_minitest_process_args!(args)
+      # Gross hack to allow for plugins to be loaded before we require the test files
+      Minitest.load_plugins unless args.delete("--no-plugins") || ENV["MT_NO_PLUGINS"]
+      processed_args = Minitest.process_args(args)
+      original_process_args = Minitest.method(:process_args)
+      Minitest.define_singleton_method(:process_args) do |input_args|
+        Minitest.define_singleton_method(:process_args, original_process_args)
+
+        if input_args == args
+          processed_args
+        else
+          original_process_args.call(input_args)
+        end
+      end
+    end
 
     def fetch_dep_loadpaths(gemspec, seen = {})
       return [] if seen[gemspec.name]
@@ -87,6 +106,7 @@ module Nicetest
 
       loadpaths = fetch_dep_loadpaths(Gem.loaded_specs["nicetest"]).map { |path| "-I#{path}" }
       requires = ["-rnicetest"]
+      includes = ["-I#{dir}/test"]
       args_with_removed_leading_path = @argv.map do |arg|
         arg = arg.dup
         arg.delete_prefix!(dir)
@@ -102,6 +122,7 @@ module Nicetest
           RbConfig.ruby,
           *loadpaths,
           *requires,
+          *includes,
           "-e",
           "exit(Nicetest::Cli.new(ARGV).run_tests)",
           "--",
@@ -123,7 +144,7 @@ module Nicetest
 
     def select_file_args(args)
       args = args.dup
-      Minitest.instance_variable_set(:@extensions, Set.new) # Avoid double-loading plugins
+      Minitest.instance_variable_set(:@extensions, Set.new(Minitest.extensions)) # Avoid double-loading plugins
       Minitest.load_plugins unless args.delete("--no-plugins") || ENV["MT_NO_PLUGINS"]
       # this will remove all options from the args array
       temporarily_disable_optparse_callbacks { Minitest.process_args(args) }
@@ -159,7 +180,8 @@ module Nicetest
     end
 
     def adjust_load_path!
-      $LOAD_PATH.unshift(File.expand_path("test"))
+      $LOAD_PATH.unshift(File.expand_path("test")) unless @adjusted
+      @adjusted = true
     end
 
     def temporarily_disable_optparse_callbacks(&blk)
@@ -174,6 +196,12 @@ module Nicetest
         define_method(:callback!, original_callback)
         remove_method(:noop_callback!)
       end
+    end
+
+    def register_minitest_plugins!
+      Minitest.register_plugin(Nicetest::NicetestPlugin)
+      Minitest.register_plugin(Nicetest::ReportersPlugin)
+      Minitest.register_plugin(Nicetest::SuperdiffPlugin)
     end
 
     Opts = Struct.new(:cd, :name) do
