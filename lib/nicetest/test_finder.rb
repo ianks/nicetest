@@ -23,7 +23,8 @@ module Nicetest
 
     def find_test(filename, lineno)
       range_finder = @parse_cache[filename] ||= RangeFinder.parse_file(filename)
-      range_finder.nearest_test_for_line(lineno)
+      regexp = range_finder.nearest_test_for_line(lineno)
+      "^#{regexp}$" if regexp
     rescue => e
       Nicetest.logger.warn("Failed to parse #{filename} (#{e.class}: #{e.message})")
       nil

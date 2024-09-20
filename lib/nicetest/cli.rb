@@ -9,6 +9,7 @@ require "set"
 module Nicetest
   class Cli
     def initialize(argv)
+      @original_argv = argv.dup
       @argv = argv
       @logger = Logger.new($stderr)
       adjust_load_path!
@@ -55,10 +56,11 @@ module Nicetest
       @logger.fatal!("no test files found") if required_files.compact.empty?
 
       if filters.any?
-        processed_args[:filter] = Regexp.union(*filters.map do |filter|
-          Regexp.new("^#{filter}$")
+        processed_args[:filter] = Regexp.union(*filters.map do |source|
+          Regexp.new(source)
         end)
-        processed_args[:args] = "#{processed_args[:args]} --name=/^#{processed_args[:filter].source}$/"
+
+        processed_args[:args] = "#{processed_args[:args]} --name=/#{processed_args[:filter].source}/"
       end
 
       patch_minitest_process_args!(processed_args)
@@ -108,7 +110,7 @@ module Nicetest
       loadpaths = fetch_dep_loadpaths(Gem.loaded_specs["nicetest"]).map { |path| "-I#{path}" }
       requires = ["-rnicetest"]
       includes = ["-I#{dir}/test"]
-      args_with_removed_leading_path = @argv.map do |arg|
+      args_with_removed_leading_path = @original_argv.map do |arg|
         arg = arg.dup
         arg.delete_prefix!(dir)
         arg.delete_prefix!(File.expand_path(dir))
