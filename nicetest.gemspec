@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency("pastel", "~> 0.8")
   spec.add_dependency("prism", ">= 0.30")
   spec.add_dependency("super_diff", "~> 0.12")
+  spec.add_dependency("logger")
 
   spec.cert_chain = ["certs/ianks.pem"]
   unless ENV["RUBYGEMS_FORCE_DISABLE_GEM_SIGNING"] == "true"
