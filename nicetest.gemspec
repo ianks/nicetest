@@ -21,6 +21,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency("base64")
+  spec.add_dependency("bigdecimal")
   spec.add_dependency("logger")
   spec.add_dependency("minitest", ">= 5.0")
   spec.add_dependency("minitest-focus", "~> 1.4")
